@@ -27,6 +27,7 @@ fetch('http://localhost:3000/api/products/' + productId)
     }else{
         price.textContent = data.price
     }
+    
     // Colors variation product //
     let colors = document.getElementById('colors');
         for (let color of data.colors) {
