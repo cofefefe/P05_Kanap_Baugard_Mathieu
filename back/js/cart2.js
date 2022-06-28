@@ -12,12 +12,12 @@ button.addEventListener("click", () => {
             productName : data.name,
             productId : data._id,
             quantity : document.getElementById('quantity').value,
-            color : data.colors
+            color : document.getElementById('colors').value
         }
 
         let productInLocalStorage = JSON.parse(localStorage.getItem("product"))
         // s'il y a un produit dans le local storage  //
-        if(productInLocalStorage){
+        if(productInLocalStorage == true){
             productInLocalStorage.push(optionsProduct)
             localStorage.setItem("produit", JSON.stringify(productInLocalStorage))
         }
