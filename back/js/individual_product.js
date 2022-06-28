@@ -20,21 +20,14 @@ fetch('http://localhost:3000/api/products/' + productId)
     // Show price product //
     let price = document.getElementById('price')
     price.textContent = data.price
-    // Price modifier thanks to quantity  !!FEATURE not over//
-    let multiplier = document.getElementById('quantity')
-    if(multiplier != 0){
-        price.textContent = data.price*number(multiplier)
-    }else{
-        price.textContent = data.price
-    }
-    
+
     // Colors variation product //
     let colors = document.getElementById('colors');
-        for (let color of data.colors) {
-            let option = document.createElement('option');
-            option.value = color;
-            option.textContent = color;
-            colors.appendChild(option);
-        }
-})
+    for (let color of data.colors) {
+        let option = document.createElement('option');
+        option.value = color;
+        option.textContent = color;
+        colors.appendChild(option);
+    }
+});
 
