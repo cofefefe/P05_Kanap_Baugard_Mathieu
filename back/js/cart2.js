@@ -11,7 +11,7 @@ button.addEventListener("click", () => {
         {
             productName : data.name,
             productId : data._id,
-            quantity : document.getElementById('quantity'),
+            quantity : document.getElementById('quantity').value,
             color : data.colors
         }
 

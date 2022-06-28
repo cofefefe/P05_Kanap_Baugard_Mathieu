@@ -8,7 +8,7 @@ function saveBasket (basket){
 }
 /// Récupération des données sauvegardées par local storage ///
 function getBasket() {
-    let basket = localStorage.getItem("product.html?id="  )
+    let basket = localStorage.getItem("product.html?id=")
     if(basket == null){
         return [];
     }else{
@@ -17,8 +17,8 @@ function getBasket() {
 }
 /// Ajout de données dans le localStorage par le client ///
 
-    function addBasket(product) {
-        fetch('http://localhost:3000/api/products')
+function addBasket(product) {
+    fetch('http://localhost:3000/api/products')
         .then(res => res.json())
         .then((product) => {
  

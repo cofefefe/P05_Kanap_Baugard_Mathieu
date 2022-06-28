@@ -21,6 +21,11 @@ fetch('http://localhost:3000/api/products/' + productId)
     let price = document.getElementById('price')
     price.textContent = data.price
 
+    // show product name //
+    let title = document.querySelector('h1')
+    title.textContent = data.name
+    console.log(title)
+
     // Colors variation product //
     let colors = document.getElementById('colors');
     for (let color of data.colors) {
