@@ -1,3 +1,4 @@
+
 const addProduct = document.getElementById('addToCart')
 
 
@@ -7,12 +8,13 @@ function saveBasket (basket){
 }
 /// Récupération des données sauvegardées par local storage ///
 function getBasket() {
-    let basket = localStorage.getItem("product.html?id=" + productId)
+    let basket = localStorage.getItem("product.html?id="  )
     if(basket == null){
         return [];
     }else{
         return JSON.parse(basket);
-    }}
+    }
+}
 /// Ajout de données dans le localStorage par le client ///
 
     function addBasket(product) {
@@ -21,7 +23,7 @@ function getBasket() {
         .then((product) => {
  
         let basket = getBasket()
-        let findProduct = basket.find(p => p.id == "product.html?id=" + productId);
+        let findProduct = basket.find(p => p.id != productId);
         value = productId
         if(findProduct != undefined){
             findProduct.quantity++
@@ -42,7 +44,7 @@ function removeBasket(product){
 /// controle de la quantité pour avoir des sommes pertinentes ( pas de -1 ) ///
 function changeQuantity(product, quantity){
     let basket = getBasket();
-    let findProduct = basket.find(p => p.id == "product.html?id=" + productId)
+    let findProduct = basket.find(p => p.id == "product.html?id=" )
     if (findProduct != undefined) {
         findProduct.quantity += quantity
         if(findProduct.quantity <= 0){
@@ -68,13 +70,11 @@ function totalPrice() {
     for(let product of basket){
         number += product.quantity * product.price
     }
-    document.getElementById('cart__price')
     return number
 }
 
 addProduct.addEventListener('click', () => {
-    saveBasket()
-    addBasket()
-    numberProduct()
-    totalPrice()
+addBasket()
+numberProduct()
+totalPrice()
 })
