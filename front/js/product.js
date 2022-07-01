@@ -73,32 +73,60 @@ fetch('http://localhost:3000/api/products/' + productId)
     });
 
     let button = document.getElementById("addToCart")
- // J'execute une premiere fois
 
 
 button.addEventListener("click", () => {
-    let quantitySelected = document.getElementById("quantity").value
-  
 
+    let quantitySelected = document.getElementById("quantity").value
+    let colorSelected = document.getElementById('colors').value
+  
     let optionsProduct =
-    {
-        productId : productId,
-        quantity : quantitySelected,
-        color : document.getElementById('colors').value
-    }
+        {
+            productId : productId,
+            quantity : quantitySelected,
+            color : colorSelected
+        }
 
     let productInLocalStorage = JSON.parse(localStorage.getItem("product"))
-    // s'il y a un produit dans le local storage  //
+
+function getProduct () {
+    let product = localStorage.getItem("product")
+    if(product == null){
+        return []
+    }else{
+        return JSON.parse(productInLocalStorage)
+    }
+}
+
+function addProduct () {
+    ifProductIsSimilarManageQuantity()
+    let productInLocalStorage = getProduct()
+    // s'il y a un produit dans le local storage on le push //
     if(productInLocalStorage){
         productInLocalStorage.push(optionsProduct)
         localStorage.setItem("product", JSON.stringify(productInLocalStorage))
     }
-    // s'il n'y a pas un product dans le local storage  //
+    // s'il n'y a pas un product dans le local storage on créé un array avant le push //
     else{
         productInLocalStorage = []
         productInLocalStorage.push(optionsProduct)
-        console.log(productInLocalStorage)
         localStorage.setItem("product", JSON.stringify(productInLocalStorage))
     }
+}
+
+// s'il y a un produit similaire dans le panier, alors on adapte simplement la quantité //
+function ifProductIsSimilarManageQuantity () {
+    let productInLocalStorage = getProduct()
+    let productSimilarId = productInLocalStorage.find(p => p.id == productId)
+    
+    if(productSimilarId != undefined){
+        productSimilarId.quantity++
+    }else{
+        optionsProduct.quantity = 1
+    }
+}
+
+addProduct()
 
 })
+
