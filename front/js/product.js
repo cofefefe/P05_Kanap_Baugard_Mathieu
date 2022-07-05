@@ -80,15 +80,15 @@ button.addEventListener("click", () => {
     let quantitySelected = document.getElementById("quantity").value
     let colorSelected = document.getElementById('colors').value
 // on définit les paramètres de personnalisation du client, et l'ID afin d'isoler le produit selectionné
-    let optionsProduct =
-        {
-            productId : productId,
-            quantity : quantitySelected,
-            color : colorSelected
-        }
+let optionsProduct =
+    {
+        productId : productId,
+        quantity : quantitySelected,
+        color : colorSelected
+    }
 
-    let productInLocalStorage = JSON.parse(localStorage.getItem("product"))
-
+let productInLocalStorage = JSON.parse(localStorage.getItem("product"))
+// utilisation des produits présents dans le local storage
 function getProduct () {
     let product = localStorage.getItem("product")
     if(product == null){
