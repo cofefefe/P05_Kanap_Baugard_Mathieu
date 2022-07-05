@@ -79,7 +79,7 @@ button.addEventListener("click", () => {
 
     let quantitySelected = document.getElementById("quantity").value
     let colorSelected = document.getElementById('colors').value
-  
+// on définit les paramètres de personnalisation du client, et l'ID afin d'isoler le produit selectionné
     let optionsProduct =
         {
             productId : productId,
@@ -97,7 +97,7 @@ function getProduct () {
         return JSON.parse(productInLocalStorage)
     }
 }
-
+// ajout des produits dans le local storage
 function addProduct () {
     ifProductIsSimilarManageQuantity()
     let productInLocalStorage = getProduct()
@@ -118,9 +118,10 @@ function addProduct () {
 function ifProductIsSimilarManageQuantity () {
     let productInLocalStorage = getProduct()
     let productSimilarId = productInLocalStorage.find(p => p.id == productId)
-    
+    // Si productSimilarId est indéfinit, c'est qu'il ne trouve pas de doublon, donc on ajoute un quantité au produit
     if(productSimilarId != undefined){
         productSimilarId.quantity++
+    // sinon la quantité de base sera d'un seul produit
     }else{
         optionsProduct.quantity = 1
     }
