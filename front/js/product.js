@@ -1,68 +1,32 @@
 let site = document.location;
-let link = new URL (site)
+let link = new URL(site)
 let productId = link.searchParams.get("id");
 
 fetch('http://localhost:3000/api/products/' + productId)
     .then(res => res.json())
     .then((product) => {
 
-    // Show image //
-    let img = document.createElement('img')
-    img.src = product.imageUrl
-    img.alt = product.altTxt;
-    let itemImg = document.querySelector('.item__img');
-    itemImg.appendChild(img);
+        // Show image //
+        let img = document.createElement('img')
+        img.src = product.imageUrl
+        img.alt = product.altTxt;
+        let itemImg = document.querySelector('.item__img');
+        itemImg.appendChild(img);
 
-    // Show description //
-    let description = document.getElementById('description');
-    description.textContent = product.description;
-
-    // Show price product //
-    let price = document.getElementById('price')
-    price.textContent = product.price
-
-    // show product name //
-    let title = document.querySelector('h1')
-    title.textContent = product.name
-    console.log(title)
-
-    // Colors variation product //
-    let colors = document.getElementById('colors');
-    for (let color of product.colors) {
-        let option = document.createElement('option');
-        option.value = color;
-        option.textContent = color;
-        colors.appendChild(option);
-    }
-});
-
-
-
-
-let url = new URL(site);
-
-
-
-fetch('http://localhost:3000/api/products/' + productId)
-    .then(function (response) {
-        return response.json();
-    })
-    .then(function (product) {
-        displayProductImage(product);
-
-        // Display Product title
-        let title = document.getElementById('title');
-        title.textContent = product.name;
-
-        // Display Product price
-        let price = document.getElementById('price');
-        price.textContent = product.price;
-
-        // Display Product description
+        // Show description //
         let description = document.getElementById('description');
         description.textContent = product.description;
 
-        // Display Product colors
+        // Show price product //
+        let price = document.getElementById('price')
+        price.textContent = product.price
+
+        // show product name //
+        let title = document.querySelector('h1')
+        title.textContent = product.name
+        console.log(title)
+
+        // Colors variation product //
         let colors = document.getElementById('colors');
         for (let color of product.colors) {
             let option = document.createElement('option');
@@ -72,62 +36,65 @@ fetch('http://localhost:3000/api/products/' + productId)
         }
     });
 
-    let button = document.getElementById("addToCart")
 
+let addToCartButton = document.getElementById("addToCart")
 
-button.addEventListener("click", () => {
+addToCartButton.addEventListener("click", () => {
 
-    let quantitySelected = document.getElementById("quantity").value
+    let quantitySelected = parseInt(document.getElementById("quantity").value);
     let colorSelected = document.getElementById('colors').value
-// on définit les paramètres de personnalisation du client, et l'ID afin d'isoler le produit selectionné
-let optionsProduct =
-    {
-        productId : productId,
-        quantity : quantitySelected,
-        color : colorSelected
-    }
+    // on définit les paramètres de personnalisation du client, et l'ID afin d'isoler le produit selectionné
+    let productToAddInLocalStorage =
+        {
+            id: productId,
+            quantity: quantitySelected,
+            color: colorSelected
+        }
 
-let productInLocalStorage = JSON.parse(localStorage.getItem("product"))
-// utilisation des produits présents dans le local storage
-function getProduct () {
-    let product = localStorage.getItem("product")
-    if(product == null){
-        return []
-    }else{
-        return JSON.parse(productInLocalStorage)
-    }
-}
-// ajout des produits dans le local storage
-function addProduct () {
-    ifProductIsSimilarManageQuantity()
-    let productInLocalStorage = getProduct()
-    // s'il y a un produit dans le local storage on le push //
-    if(productInLocalStorage){
-        productInLocalStorage.push(optionsProduct)
-        localStorage.setItem("product", JSON.stringify(productInLocalStorage))
-    }
-    // s'il n'y a pas un product dans le local storage on créé un array avant le push //
-    else{
-        productInLocalStorage = []
-        productInLocalStorage.push(optionsProduct)
-        localStorage.setItem("product", JSON.stringify(productInLocalStorage))
-    }
-}
+    // ajout des produits dans le local storage
+    addProductInLocalStorage(productToAddInLocalStorage);
 
-// s'il y a un produit similaire dans le panier, alors on adapte simplement la quantité //
-function ifProductIsSimilarManageQuantity () {
-    let productInLocalStorage = getProduct()
-    let productSimilarId = productInLocalStorage.find(p => p.id == productId)
-    // Si productSimilarId est indéfinit, c'est qu'il ne trouve pas de doublon, donc on ajoute un quantité au produit
-    if(productSimilarId != undefined){
-        productSimilarId.quantity++
-    // sinon la quantité de base sera d'un seul produit
-    }else{
-        optionsProduct.quantity = 1
-    }
-}
-
-addProduct()
-
+    // Rediriger ver la page panier
+    // document.location.href = "cart.html";
 })
 
+// utilisation des produits présents dans le local storage
+function getProductsFromLocalStorage() {
+    let products = localStorage.getItem("products")
+    if (products == null) {
+        return []
+    } else {
+        return JSON.parse(products);
+    }
+}
+
+function addProductInLocalStorage(productToAddInLocalStorage) {
+    // Récupérer les produits dans le local storage
+    let products = getProductsFromLocalStorage();
+
+    // Est ce que le produit existe déjà dans le localStorage ?
+    let productKeyInLocalStorage = findProductKeyInLocalStorage(productToAddInLocalStorage, products);
+
+    // Mettre à jour le tableau "products" à ajouter ensuite dans le local storage
+    if (productKeyInLocalStorage === null) {
+        products.push(productToAddInLocalStorage);
+    } else {
+        let productToUpdate = products[productKeyInLocalStorage];
+        productToUpdate.quantity += productToAddInLocalStorage.quantity;
+        products[productKeyInLocalStorage] = productToUpdate;
+    }
+
+    // On met à jour le local storage
+    localStorage.setItem('products', JSON.stringify(products));
+}
+
+function findProductKeyInLocalStorage(productToAddInLocalStorage, products) {
+    let productKeyFound = null;
+    console.log("products test", products)
+    products.forEach(function (product, key) {
+        if (product.id === productToAddInLocalStorage.id && product.color === productToAddInLocalStorage.color) {
+            productKeyFound = key;
+        }
+    });
+    return productKeyFound;
+}
