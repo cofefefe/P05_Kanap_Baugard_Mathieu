@@ -55,7 +55,7 @@ addToCartButton.addEventListener("click", () => {
     addProductInLocalStorage(productToAddInLocalStorage);
 
     // Rediriger ver la page panier
-    // document.location.href = "cart.html";
+    document.location.href = "cart.html";
 })
 
 // utilisation des produits présents dans le local storage
