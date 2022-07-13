@@ -10,14 +10,7 @@ let cartItemPrototypeEl = document.querySelector('.cart__item');
 // on récupère le positionnement de l'image sur la page html
 let displayImgOnBasketPage = document.getElementsByClassName("cart__item__img")
 
-let productInfo = [];
-// on récupère les données sauvegardées dans le local storage dans un tableau, en passant par l'ID
-function getProductFromLocalStorage() {  
-    for (let product of productsFromLocalStorageArray) {
-        productInfo.push(product);
-    }
-    return productInfo;
-}
+
 // On fait un appel a l'API pour récupérer les données manquantes des options produits (imageUrl, prix)
 fetch('http://localhost:3000/api/products/')
     .then(res => res.json())
@@ -31,9 +24,7 @@ fetch('http://localhost:3000/api/products/')
                     // création d'article dans la section voulue, pour chaque produit dans le local storage
                     sectionCartItemsEl.appendChild(createArticle(product, localProduct.quantity, localProduct.color))
                     totalPrice += product.price
-
                 }
-
             });
         });
     displayTotalPrice(totalPrice)
@@ -88,22 +79,50 @@ function createArticle (product, quantity, color) {
 
 //**** Gestion de la supression d'article du Local Storage *****//
 
-let btnDeleteProductInLocalStorage = document.getElementsByClassName("deleteItem")
-// email and error email
+
+
+    // Delete event
+    let btnDeleteProductInLocalStorage = document.getElementsByClassName('deleteItem');
+    console.log(btnDeleteProductInLocalStorage)
+    btnDeleteProductInLocalStorage.addEventListener('click', () => {
+            deleteProduct(deleteButtonEl);
+        });
+    
+
+ 
+    function deleteProduct(deleteButtonEl) {
+        let cartItemEl = deleteButtonEl.closest('.cart__item');
+    
+        productsFromLocalStorageArray.forEach(function (productFromStorage, index) {
+            if (productFromStorage.productId === cartItemEl.dataset.id && productFromStorage.color === cartItemEl.dataset.color) {
+                // Delete the item
+                productsFromLocalStorageArray.slice(index, 1);
+            }
+        });
+    }    
+
+
+//**** Gestion de donnée du formulaire client *****//
+// email et erreur msg
 let emailInput = document.getElementById("email")
 let emailErrorMsg = document.getElementById("emailErrorMsg")
-// firstname et erreur
+// firstname et erreur msg
 let firstNameClient = document.getElementById("firstName")
 let firstNameErrorMsg = document.getElementById("firstNameErrorMsg")
-// lastname et erreur
+// lastname et erreur msg
 let lastNameClient = document.getElementById("lastName")
 let lastNameErrorMsg = document.getElementById("lastNameErrorMsg")
-// adresse et erreur
+// adresse et erreur msg
 let addressErrorMsg = document.getElementById("adressErrorMsg")
 let adressClient = document.getElementById("adress")
 
 
-//**** Gestion de donnée du formulaire client *****//
+// Paramètrage de différents regex : email, ville/nom/prenom, adresse
+let regexEmail = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9-_]+[.]{1}[a-z]{2,10}$')
+let regexName = new RegExp('^[a-z,.-]{2,20}$')
+let regexAdress = new RegExp("^[a-zA-Z0-9\s,-]*$")
+
+// La variable contact sera la fiche contact du client, représentant toutes les clés necessaire et données saisies
 let contact = {
     firstName: document.getElementById("firstName").value,
     lastName: document.getElementById("lastName").value,
@@ -111,9 +130,8 @@ let contact = {
     city: document.getElementById("city").value,
     email: document.getElementById("email").value,
 };
-// Critère de validation d'adresse email //
-let regexEmail = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9-_]+[.]{1}[a-z]{2,10}$');
 
+// Validation d'adresse email //
 function clientEmailVerification () {
 if (regexEmail.test(contact.email) === false) {
     emailErrorMsg.textContent = 'Veuillez saisir une adresse Email valide';
@@ -124,10 +142,7 @@ if (regexEmail.test(contact.email) === false) {
 return true;
 }
 
-// critère de validation de nom/prénom
-
-let regexName = new RegExp('^[a-zA-Z-_]{2,15}')
-
+// Validation de nom/prénom
 function clientFirstNameVerification(){
 if (regexName.test(contact.firstName) === false){
     firstNameErrorMsg.textContent = 'Veuillez saisir un prénom valide'
@@ -137,21 +152,18 @@ if (regexName.test(contact.firstName) === false){
 } 
 return true
 }
-
 function clientLastNameVerification(){
-    if (regexName.test(contact.firstName) === false){
-        firstNameErrorMsg.textContent = 'Veuillez saisir un nom valide'
+    if (regexName.test(contact.lastName) === false){
+        lastNameErrorMsg.textContent = 'Veuillez saisir un nom valide'
         return false
     } else {
-        firstNameErrorMsg.textContent = ''
+        lastNameErrorMsg.textContent = ''
     } 
     return true
 }
 
-// critère validation d'adresse
-let regexAdress = new RegExp("^[a-zA-Z0-9\s,-]*$")
-
-function clientAdressVerification(){
+// Validation d'adresse
+function clientAdressVerification(event){
     if (regexAdress.test(contact.address) === false){
         addressErrorMsg.textContent = 'Veuillez saisir une adresse valide'
         return false
@@ -160,10 +172,13 @@ function clientAdressVerification(){
     } 
     return true
 }
-// critère validation de ville, comme les prénoms pas de chiffres ni de symbole, on utilise le regex name
-function clientcityVerification(){
+
+// Validation de ville, comme les prénoms pas de chiffres ni de symbole, on utilise le regex name
+function clientcityVerification(event){
     if (regexName.test(contact.city) === false){
         cityErrorMsg.textContent = 'Veuillez saisir une ville valide'
+        event.preventDefault()
+
         return false
     } else {
         cityErrorMsg.textContent = ''
@@ -171,12 +186,16 @@ function clientcityVerification(){
     return true
 }
 
-document.getElementById('order').addEventListener('click', function verifyInfoClientOrder(){
-    clientcityVerification()
-    clientAdressVerification()
-    clientFirstNameVerification()
-    clientLastNameVerification()
-    clientEmailVerification ()
-})
+// Si l'une de ces vérifications est false, alors on annule l'actualisation de la page
+document.getElementById('order').addEventListener('click', function verifyInfoClientOrder(e){
 
-verifyInfoClientOrder()
+    if(
+          clientcityVerification() == false 
+       || clientAdressVerification() == false 
+       || clientFirstNameVerification() == false 
+       || clientLastNameVerification() == false 
+       || clientEmailVerification() == false
+       ){
+            e.preventDefault()
+        }
+})
