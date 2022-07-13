@@ -79,29 +79,6 @@ function createArticle (product, quantity, color) {
 
 //**** Gestion de la supression d'article du Local Storage *****//
 
-
-
-    // Delete event
-    let btnDeleteProductInLocalStorage = document.getElementsByClassName('deleteItem');
-    console.log(btnDeleteProductInLocalStorage)
-    btnDeleteProductInLocalStorage.addEventListener('click', () => {
-            deleteProduct(deleteButtonEl);
-        });
-    
-
- 
-    function deleteProduct(deleteButtonEl) {
-        let cartItemEl = deleteButtonEl.closest('.cart__item');
-    
-        productsFromLocalStorageArray.forEach(function (productFromStorage, index) {
-            if (productFromStorage.productId === cartItemEl.dataset.id && productFromStorage.color === cartItemEl.dataset.color) {
-                // Delete the item
-                productsFromLocalStorageArray.slice(index, 1);
-            }
-        });
-    }    
-
-
 //**** Gestion de donnée du formulaire client *****//
 // email et erreur msg
 let emailInput = document.getElementById("email")
