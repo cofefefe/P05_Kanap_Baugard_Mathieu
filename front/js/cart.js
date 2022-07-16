@@ -25,7 +25,6 @@ fetch('http://localhost:3000/api/products/')
             document.location = "confirmation.html";
         })
 
-
 })
 
 function displayArticles(products) {
@@ -41,6 +40,8 @@ function displayArticles(products) {
             }
         });
     });
+    displayLengthArticles()
+    managingQuantityByClient()
     return articles;
 }
 
@@ -100,7 +101,7 @@ function createArticle (product, quantity, color) {
 // Paramètrage de différents regex : email, ville/nom/prenom, adresse
 let regexEmail = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9-_]+[.]{1}[a-z]{2,10}$')
 let regexName = new RegExp('^[a-z,.-]{2,20}$')
-let regexAdress = new RegExp("^[a-zA-Z0-9\s,-]*$")
+let regexAddress = new RegExp("^[a-zA-Z0-9\s,-]*$")
 
 
 // Validation d'adresse email //
@@ -114,7 +115,6 @@ if (regexEmail.test(contact.email) === false) {
 }
 return true;
 }
-
 // Validation de nom/prénom
 function clientFirstNameVerification(contact){
     let firstNameErrorMsg = document.getElementById("firstNameErrorMsg")
@@ -136,11 +136,10 @@ function clientLastNameVerification(contact){
     } 
     return true
 }
-
 // Validation d'adresse
-function clientAdressVerification(contact){
+function clientAddressVerification(contact){
     let addressErrorMsg = document.getElementById("addressErrorMsg")
-    if (regexAdress.test(contact.address) === false){
+    if (regexAddress.test(contact.address) === false){
         addressErrorMsg.textContent = 'Veuillez saisir une adresse valide'
         return false
     } else {
@@ -148,7 +147,6 @@ function clientAdressVerification(contact){
     } 
     return true
 }
-
 // Validation de ville, comme les prénoms pas de chiffres ni de symbole, on utilise le regex name
 function validateClientCity(contact){
     let cityErrorMsg = document.getElementById("cityErrorMsg");
@@ -177,7 +175,7 @@ function formIsValid() {
     if (!validateClientCity(contact)) {
         formIsValid = false;
     }
-    if (!clientAdressVerification(contact)) {
+    if (!clientAddressVerification(contact)) {
         formIsValid = false;
     }
     if (!clientFirstNameVerification(contact)) {
@@ -191,3 +189,47 @@ function formIsValid() {
     }
     return formIsValid;
 }
+// Montrer le nombre d'article différents présents dans la commande client
+function displayLengthArticles(){
+    let LengthArticles = document.getElementById('totalQuantity')
+    LengthArticles.textContent = productsFromLocalStorageArray.length
+}
+///******* Gestion de quantité, client peut changer quantité de produit sur la page de commande ********///
+function managingQuantityByClient() {
+    let btnClientManageQuantity = document.querySelectorAll(".itemQuantity");
+
+    for (let k= 0; k < btnClientManageQuantity.length; k++){
+        btnClientManageQuantity[k].addEventListener("change" , (event) => {
+            event.preventDefault();
+
+            // On modifie seulement la quantité de l'élement selectionné
+            let quantityModification = productsFromLocalStorageArray[k].quantity;
+            let quantityProductChooseByClient = btnClientManageQuantity[k].valueAsNumber;
+            // On repère quel est l'élement selectionné
+            const resultFind = productsFromLocalStorageArray.find((el) => el.quantityProductChooseByClient !== quantityModification);
+            // On en modifie la quantité
+            resultFind.quantity = quantityProductChooseByClient;
+            productsFromLocalStorageArray[k].quantity = resultFind.quantity;
+
+            localStorage.setItem("products", JSON.stringify(productsFromLocalStorageArray));
+            // refresh rapide
+            location.reload();
+        })
+    }
+}
+///****** Supression de produit, client peut supprimer produit du ls de la page commande ******///
+document.addEventListener('DOMContentLoaded',async function(){
+    let btnDeleteItemFromLocalStorage = document.getElementsByClassName('deleteItem')
+
+    btnDeleteItemFromLocalStorage.addEventListener('click', ()=> {
+        console.log("ok")
+    })
+    console.log(btnDeleteItemFromLocalStorage)
+    //make AJAX request when button is clicked
+  });
+
+function deletionProductByClient() {
+    
+}
+deletionProductByClient()
+// function deleItem deletes a selected entry from the localStorage
