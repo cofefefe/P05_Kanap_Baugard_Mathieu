@@ -4,10 +4,17 @@ let productsFromLocalStorage = localStorage.getItem('products');
 let productsFromLocalStorageArray = JSON.parse(productsFromLocalStorage);
 // on déclare une variable qui va gérer le prix total de notre commande
 let sectionCartItemsEl = document.getElementById('cart__items');
-// on récupère le modèle de l'article
-// on récupère le positionnement de l'image sur la page html
 
+let getProductFromLocalStorage = JSON.parse(localStorage.getItem("product"))
 
+function getProduct(){
+    if(productsFromLocalStorageArray){
+        JSON.parse(localStorage.getItem("product"))
+        return true
+    }else{
+        return false
+    }
+}
 // On fait un appel a l'API pour récupérer les données manquantes des options produits (imageUrl, prix)
 fetch('http://localhost:3000/api/products/')
     .then(res => res.json())
@@ -55,6 +62,11 @@ function displayTotalPrice(articles){
 }
 // On génère une aboresence html qui se reproduira pour chaque produit ainsi que les classes pour adapter le style
 function createArticle (product, quantity, color) {
+    if(getProduct == false){
+        const elemPanierVide = `<div style="display:flex; margin:auto; justify-content:center"><p style="font-size:40px; padding: 30px">Votre panier est vide</p></div>`;
+        const elem = document.querySelector("#cartAndFormContainer h1")
+        elem.insertAdjacentHTML("afterend", elemPanierVide)
+    }else{    
     let newArticle = document.createElement("article")
     newArticle.classList.add("cart__item")
     newArticle.dataset.id = product._id
@@ -96,6 +108,7 @@ function createArticle (product, quantity, color) {
     deleteItem.textContent = "Supprimer"
 
     return newArticle
+    }
 }
 
 // Paramètrage de différents regex : email, ville/nom/prenom, adresse
@@ -218,18 +231,18 @@ function managingQuantityByClient() {
     }
 }
 ///****** Supression de produit, client peut supprimer produit du ls de la page commande ******///
-document.addEventListener('DOMContentLoaded',async function(){
-    let btnDeleteItemFromLocalStorage = document.getElementsByClassName('deleteItem')
+const deleteItemFromLocalStorage = async (displayArticles) => {
+    await displayArticles
+    let btnDeleteItemFromLocalStorage = document.querySelectorAll('button')
 
-    btnDeleteItemFromLocalStorage.addEventListener('click', ()=> {
-        console.log("ok")
-    })
-    console.log(btnDeleteItemFromLocalStorage)
-    //make AJAX request when button is clicked
-  });
+    btnDeleteItemFromLocalStorage.forEach(btn=>{
+        btn.addEventListener('click',()=>{
+           const found = productsFromLocalStorageArray.find(element => element.id == productsFromLocalStorageArray.id)
+           if(found == true){
+            productsFromLocalStorageArray.removeItem('products')
+            console.log('ok')
+           }        
+        }
+    )}
+)}
 
-function deletionProductByClient() {
-    
-}
-deletionProductByClient()
-// function deleItem deletes a selected entry from the localStorage
