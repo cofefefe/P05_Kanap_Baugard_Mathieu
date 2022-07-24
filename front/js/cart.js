@@ -250,7 +250,5 @@ const deleteItemFromLocalStorage = (displayArticles) => {
                 return element.id === productsFromLocalStorageArray.id 
                 && element.color === productsFromLocalStorageArray.color
             });
-            localStorage.removeItem("products", found)
-        }
-    )}
-)}
+            localStorage.setItem("products", JSON.stringify(found))
+        })})}
