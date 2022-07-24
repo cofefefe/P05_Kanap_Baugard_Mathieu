@@ -24,7 +24,7 @@ fetch('http://localhost:3000/api/products/')
         displayTotalPrice(articles);
 
         // Si l'une de ces vérifications est false, alors on annule l'actualisation de la page
-        document.getElementById('order').addEventListener('click', function verifyInfoClientOrder(e){
+        document.getElementById('order').addEventListener('click', function (e) {
             e.preventDefault()
             if (!formIsValid()) {
                 return;
@@ -49,6 +49,7 @@ function displayArticles(products) {
     });
     displayLengthArticles()
     managingQuantityByClient()
+    deleteItemFromLocalStorage()
     return articles;
 }
 
@@ -110,6 +111,8 @@ function createArticle (product, quantity, color) {
     return newArticle
     }
 }
+
+
 
 // Paramètrage de différents regex : email, ville/nom/prenom, adresse
 let regexEmail = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9-_]+[.]{1}[a-z]{2,10}$')
@@ -212,37 +215,42 @@ function managingQuantityByClient() {
     let btnClientManageQuantity = document.querySelectorAll(".itemQuantity");
 
     for (let k= 0; k < btnClientManageQuantity.length; k++){
+        let btnClientManageQuantity = document.querySelectorAll(".itemQuantity");
+
         btnClientManageQuantity[k].addEventListener("change" , (event) => {
             event.preventDefault();
+            let quantityEl = event.target;
+            let productEl = quantityEl.closest('article');
+
+            let productId = productEl.dataset.id;
+            let productColor = productEl.dataset.color;
+            let quantity = parseInt(quantityEl.value);
 
             // On modifie seulement la quantité de l'élement selectionné
-            let quantityModification = productsFromLocalStorageArray[k].quantity;
-            let quantityProductChooseByClient = btnClientManageQuantity[k].valueAsNumber;
-            // On repère quel est l'élement selectionné
-            const resultFind = productsFromLocalStorageArray.find((el) => el.quantityProductChooseByClient !== quantityModification);
-            // On en modifie la quantité
-            resultFind.quantity = quantityProductChooseByClient;
-            productsFromLocalStorageArray[k].quantity = resultFind.quantity;
 
+            // On repère quel est l'élement selectionné
+            const productFromLocalStorage = productsFromLocalStorageArray.find((product) => {
+                return product.id === productId && product.color === productColor;
+            });
+
+            // On en modifie la quantité
+            productFromLocalStorage.quantity = quantity;
             localStorage.setItem("products", JSON.stringify(productsFromLocalStorageArray));
-            // refresh rapide
-            location.reload();
         })
     }
 }
 ///****** Supression de produit, client peut supprimer produit du ls de la page commande ******///
-const deleteItemFromLocalStorage = async (displayArticles) => {
-    await displayArticles
-    let btnDeleteItemFromLocalStorage = document.querySelectorAll('button')
+const deleteItemFromLocalStorage = (displayArticles) => {
+    let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
 
-    btnDeleteItemFromLocalStorage.forEach(btn=>{
-        btn.addEventListener('click',()=>{
-           const found = productsFromLocalStorageArray.find(element => element.id == productsFromLocalStorageArray.id)
-           if(found == true){
-            productsFromLocalStorageArray.removeItem('products')
-            console.log('ok')
-           }        
+    btnDeleteItemFromLocalStorage.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            const buttonEl = event.target;
+            const found = productsFromLocalStorageArray.filter(element => {
+                return element.id === productsFromLocalStorageArray.id 
+                && element.color === productsFromLocalStorageArray.color
+            });
+            localStorage.removeItem("products", found)
         }
     )}
 )}
-
