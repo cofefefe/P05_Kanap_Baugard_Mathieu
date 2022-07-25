@@ -49,7 +49,6 @@ function displayArticles(products) {
     });
     displayLengthArticles()
     managingQuantityByClient()
-    deleteItemFromLocalStorage()
     return articles;
 }
 
@@ -239,16 +238,28 @@ function managingQuantityByClient() {
         })
     }
 }
+
 ///****** Supression de produit, client peut supprimer produit du ls de la page commande ******///
 const deleteItemFromLocalStorage = (displayArticles) => {
-    let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
+    // on se saisit des boutons sur la page
+        let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
+     
+   // On test si on repère leur présence, c'est le cas
+        console.log(btnDeleteItemFromLocalStorage)
+     
+    // maintenant on créé une fonction pour chaque bouton
+     
+             
+    // qui écoutera l'événement
+    
+    
+}
+let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
 
-    btnDeleteItemFromLocalStorage.forEach(btn => {
-        btn.addEventListener('click', (event) => {
-            const buttonEl = event.target;
-            const found = productsFromLocalStorageArray.filter(element => {
-                return element.id === productsFromLocalStorageArray.id 
-                && element.color === productsFromLocalStorageArray.color
-            });
-            localStorage.setItem("products", JSON.stringify(found))
-        })})}
+btnDeleteItemFromLocalStorage.forEach(btn => {
+    btn.addEventListener("click", ()=>{
+             
+        alert('evenement repéré')
+    })
+})
+deleteItemFromLocalStorage()
