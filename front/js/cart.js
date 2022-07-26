@@ -5,11 +5,11 @@ let productsFromLocalStorageArray = JSON.parse(productsFromLocalStorage);
 // on déclare une variable qui va gérer le prix total de notre commande
 let sectionCartItemsEl = document.getElementById('cart__items');
 
-let getProductFromLocalStorage = JSON.parse(localStorage.getItem("product"))
+let getProductFromLocalStorage = JSON.parse(localStorage.getItem("products"))
 
 function getProduct(){
     if(productsFromLocalStorageArray){
-        JSON.parse(localStorage.getItem("product"))
+        JSON.parse(localStorage.getItem("products"))
         return true
     }else{
         return false
@@ -48,6 +48,7 @@ function displayArticles(products) {
         });
     });
     displayLengthArticles()
+    deleteItemFromLocalStorage()
     managingQuantityByClient()
     return articles;
 }
@@ -240,7 +241,7 @@ function managingQuantityByClient() {
 }
 
 ///****** Supression de produit, client peut supprimer produit du ls de la page commande ******///
-const deleteItemFromLocalStorage = (displayArticles) => {
+function deleteItemFromLocalStorage() {
     // on se saisit des boutons sur la page
         let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
      
@@ -248,18 +249,19 @@ const deleteItemFromLocalStorage = (displayArticles) => {
         console.log(btnDeleteItemFromLocalStorage)
      
     // maintenant on créé une fonction pour chaque bouton
-     
-             
-    // qui écoutera l'événement
-    
+    btnDeleteItemFromLocalStorage.forEach(btn => {
+        // Au clic
+        btn.addEventListener("click", ()=>{
+        // On utilise la méthode filter pour selectionner des produits
+
+            let selectedProduct = 
+            productsFromLocalStorageArray.filter(product => product.id == productsFromLocalStorageArray.id && product.color == productsFromLocalStorageArray.color)
+            console.log(productsFromLocalStorageArray[l].id)
+        })
+    })    
     
 }
-let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
 
-btnDeleteItemFromLocalStorage.forEach(btn => {
-    btn.addEventListener("click", ()=>{
-             
-        alert('evenement repéré')
-    })
-})
-deleteItemFromLocalStorage()
+for(let l = 0 ; l < btnDeleteItemFromLocalStorage.length ; l++){
+
+}
