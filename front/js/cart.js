@@ -187,18 +187,17 @@ function validateClientCity(contact) {
     return true
 }
 
+ // La variable contact sera la fiche contact du client, représentant toutes les clés necessaire et données saisies
+ let contact = {
+    firstName: document.getElementById("firstName").value,
+    lastName: document.getElementById("lastName").value,
+    address: document.getElementById("address").value,
+    city: document.getElementById("city").value,
+    email: document.getElementById("email").value,
+};
 
 function formIsValid() {
     let formIsValid = true;
-
-    // La variable contact sera la fiche contact du client, représentant toutes les clés necessaire et données saisies
-    let contact = {
-        firstName: document.getElementById("firstName").value,
-        lastName: document.getElementById("lastName").value,
-        address: document.getElementById("address").value,
-        city: document.getElementById("city").value,
-        email: document.getElementById("email").value,
-    };
 
     if (!validateClientCity(contact)) {
         formIsValid = false;
@@ -294,3 +293,23 @@ function deleteItemFromLocalStorage() {
         })
     })
 }
+
+async function managingOrder(){
+    let productsFromLocalStorageArray = getProductsFromLocalStorage();
+    let clientContact = {contact,
+                        productsFromLocalStorageArray}
+
+
+    await fetch("http://localhost:3000/api/products/order", {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(clientContact),
+            })
+            console.log(clientContact)
+}
+
+
+managingOrder()
