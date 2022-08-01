@@ -2,6 +2,7 @@ let site = document.location;
 let link = new URL(site)
 let productId = link.searchParams.get("id");
 
+// take API's data depending on the chosen product
 fetch('http://localhost:3000/api/products/' + productId)
     .then(res => res.json())
     .then((product) => {
@@ -39,11 +40,13 @@ fetch('http://localhost:3000/api/products/' + productId)
 
 let addToCartButton = document.getElementById("addToCart")
 
+// Add the Id, quantity and color selected by client to the object " productToAddInLocalStorage "
+function addProductParam() {
 addToCartButton.addEventListener("click", () => {
 
     let quantitySelected = parseInt(document.getElementById("quantity").value);
     let colorSelected = document.getElementById('colors').value
-    // on définit les paramètres de personnalisation du client, et l'ID afin d'isoler le produit selectionné
+    // define client's params
     let productToAddInLocalStorage =
         {
             id: productId,
@@ -51,14 +54,16 @@ addToCartButton.addEventListener("click", () => {
             color: colorSelected
         }
 
-    // ajout des produits dans le local storage
+    // add product to the local storage with their new params
     addProductInLocalStorage(productToAddInLocalStorage);
 
-    // Rediriger ver la page panier
+    // Redirect to the cart page after adding an item to ls
     document.location.href = "cart.html";
 })
+}
+addProductParam()
 
-// utilisation des produits présents dans le local storage
+// make an array of the local storage, empty array if LS is empty, an object " products " is push if there's something in ls
 function getProductsFromLocalStorage() {
     let products = localStorage.getItem("products")
     if (products == null) {
@@ -68,14 +73,15 @@ function getProductsFromLocalStorage() {
     }
 }
 
+// Add product selected by client to the Local Storage
 function addProductInLocalStorage(productToAddInLocalStorage) {
-    // Récupérer les produits dans le local storage
+    // take products already in LS
     let products = getProductsFromLocalStorage();
 
-    // Est ce que le produit existe déjà dans le localStorage ?
+    // May this product is already existing in ls ?
     let productKeyInLocalStorage = findProductKeyInLocalStorage(productToAddInLocalStorage, products);
 
-    // Mettre à jour le tableau "products" à ajouter ensuite dans le local storage
+    // Update " products " with the new item, or adapt quantity if he's already existing in LS
     if (productKeyInLocalStorage === null) {
         products.push(productToAddInLocalStorage);
     } else {
@@ -84,13 +90,13 @@ function addProductInLocalStorage(productToAddInLocalStorage) {
         products[productKeyInLocalStorage] = productToUpdate;
     }
 
-    // On met à jour le local storage
+    // Updating LS
     localStorage.setItem('products', JSON.stringify(products));
 }
-
+// Search and compare display Product with product in local Storage
 function findProductKeyInLocalStorage(productToAddInLocalStorage, products) {
     let productKeyFound = null;
-    console.log("products test", products)
+    // for each product in ls, generate key to target it
     products.forEach(function (product, key) {
         if (product.id === productToAddInLocalStorage.id && product.color === productToAddInLocalStorage.color) {
             productKeyFound = key;

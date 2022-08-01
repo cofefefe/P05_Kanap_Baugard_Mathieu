@@ -1,27 +1,80 @@
-// on déclare une variable qui va gérer le prix total de notre commande
+// place to display products in cart page
 let sectionCartItemsEl = document.getElementById('cart__items');
 let productCollection = [];
 
-// On fait un appel a l'API pour récupérer les données manquantes des options produits (imageUrl, prix)
-fetch('http://localhost:3000/api/products/')
-    .then(res => res.json())
-    .then((products) => {
-        productCollection = products;
-        let productsFromLocalStorageArray = getProductsFromLocalStorage();
-        displayArticles(products, productsFromLocalStorageArray);
-        displayEmptyCollection(productsFromLocalStorageArray);
-        displayTotalPrice(productsFromLocalStorageArray);
+function getProducts() {
+    // calling API to take params we needed ( quantity, color )
+    return fetch('http://localhost:3000/api/products/').then(res => res.json());
+}
 
-        // Si l'une de ces vérifications est false, alors on annule l'actualisation de la page
-        document.getElementById('order').addEventListener('click', function (e) {
-            e.preventDefault()
-            if (!formIsValid()) {
-                return;
-            }
-            document.location = "confirmation.html";
-        })
+// use promises of the previous calling to :
+getProducts().then(function (products) {
+    productCollection = products;
+    // have an array of products in local storage
+    let productsFromLocalStorageArray = getProductsFromLocalStorage();
+    // display all article in Local storage
+    displayArticles(products, productsFromLocalStorageArray);
+    // display if client's local storage is emplty
+    displayEmptyCollection(productsFromLocalStorageArray);
+    // calculate total price of theses products, and display It
+    displayTotalPrice(productsFromLocalStorageArray);
+
+    // managing event on click to make an order ('submit') 
+    document.getElementById('order').addEventListener('click', function (e) {
+        e.preventDefault()
+
+        // get product Id
+        let productIds = retrieveProductIds();
+        // Create object wich have all form value wrote by client
+        let contact = {
+            firstName: document.getElementById("firstName").value,
+            lastName: document.getElementById("lastName").value,
+            address: document.getElementById("address").value,
+            city: document.getElementById("city").value,
+            email: document.getElementById("email").value,
+        };
+        // check if every's data are correctly wrote
+        if (!formIsValid(contact)) {
+            return;
+        }
+
+        // make request to submit order
+        submit(contact, productIds)
+    })
+});
+
+// Push the product ID in an array "productIds" to use it for the purchase order
+function retrieveProductIds() {
+    let productIds = [];
+    let products = getProductsFromLocalStorage();
+
+    products.forEach(function (product) {
+        productIds.push(product.id);
     });
+    return productIds;
+}
 
+// make the order : needed all product Id in local storage, and all personnal data from forms
+function submit(contact, productIds) {
+    let params = {
+        contact: contact,
+        products: productIds
+    }
+    // make a POST to send data id
+    fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
+        // stringiy all forms data
+        body: JSON.stringify(params),
+    }).then(function (stream) {
+        return stream.json();
+    }).then(function (response) {
+        // delete local storage after submit, and redirect client to confirmation
+        localStorage.removeItem('products');
+        document.location = "confirmation.html?orderId=" + response.orderId;
+    });
+}
+// show if client's local storage is empty
 function displayEmptyCollection(articles) {
     if (articles.length === 0) {
         const elemPanierVide = `<div style="display:flex; margin:auto; justify-content:center"><p style="font-size:40px; padding: 30px">Votre panier est vide</p></div>`;
@@ -29,34 +82,35 @@ function displayEmptyCollection(articles) {
         elem.insertAdjacentHTML("afterend", elemPanierVide)
     }
 }
-
+// take products already existing in Local storage
 function getProductsFromLocalStorage() {
-    // On récupère les produits enregistrés dans le local storage
     let productsFromLocalStorage = localStorage.getItem('products');
-    // On converti les produits qui sont de type "texte" en tableau pour pouvoir utiliser la fonction forEach ensuite par exemple
+    // convert all products to an array
     return JSON.parse(productsFromLocalStorage);
 }
-
+// display Article existing in Local Storage
 function displayArticles(products, productsFromLocalStorageArray) {
     let articles = [];
-    // boucle d'affichage des produits. On fait une première boucle dans l'api puis dans le local storage
-    // Pour chaque produit, on créé un article avec structure html définie, et on lui donne ses données à y afficher
+
+    // for each product, make an article, and add params chosen by client
     products.forEach(product => {
         productsFromLocalStorageArray.forEach(localProduct => {
             if (localProduct.id === product._id) {
-                // création d'article dans la section voulue, pour chaque produit dans le local storage
                 sectionCartItemsEl.appendChild(createArticle(product, localProduct.quantity, localProduct.color))
                 articles.push(product);
             }
         });
     });
+    // update the number of products
     displayLengthArticles(productsFromLocalStorageArray)
+    // update deletion
     deleteItemFromLocalStorage()
+    // update quantity
     managingQuantityByClient()
     return articles;
 }
 
-// Affichage du prix total de la commande
+// Calculate and display Total price, for each change we'll call that function to update the price
 function displayTotalPrice(articles) {
     let totalPrice = 0;
     articles.forEach(function (article) {
@@ -65,7 +119,7 @@ function displayTotalPrice(articles) {
     });
     document.getElementById("totalPrice").textContent = totalPrice
 }
-
+// take all product id from an array
 function findProductById(productId) {
     let productFound;
     productCollection.forEach(function (product) {
@@ -76,7 +130,7 @@ function findProductById(productId) {
     return productFound;
 }
 
-// On génère une aboresence html qui se reproduira pour chaque produit ainsi que les classes pour adapter le style
+// generate tree structure html
 function createArticle(product, quantity, color) {
     let newArticle = document.createElement("article")
     newArticle.classList.add("cart__item")
@@ -101,6 +155,7 @@ function createArticle(product, quantity, color) {
     let cartItemContentSetting = cartItemContainer.appendChild(document.createElement("div"))
     cartItemContentSetting.classList.add("cart__item__content__settings")
 
+    // input quantity and add default attribute
     let cartItemQuantity = cartItemContentSetting.appendChild(document.createElement("div"))
     cartItemQuantity.classList.add("cart__item__content__settings__quantity")
     let quantitySettings = cartItemQuantity.appendChild(document.createElement("p"))
@@ -113,6 +168,7 @@ function createArticle(product, quantity, color) {
     quantityInput.setAttribute('max', '100')
     quantityInput.setAttribute('value', quantity)
 
+    // add a button to delete product
     let deleteItem = cartItemContentSetting.appendChild(document.createElement("button"))
     deleteItem.classList.add("deleteItem")
     deleteItem.setAttribute("id", "deleteItem")
@@ -122,13 +178,13 @@ function createArticle(product, quantity, color) {
 }
 
 
-// Paramètrage de différents regex : email, ville/nom/prenom, adresse
+// Params regex
 let regexEmail = new RegExp('^[a-zA-Z0-9.-_]+[@]{1}[a-zA-Z0-9-_]+[.]{1}[a-z]{2,10}$')
 let regexName = new RegExp('^[a-zA-Z,.-]{2,20}$')
 let regexAddress = new RegExp("[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+")
 
 
-// Validation d'adresse email //
+// Email validation
 function clientEmailVerification(contact) {
     let emailErrorMsg = document.getElementById("emailErrorMsg")
     if (regexEmail.test(contact.email) === false) {
@@ -140,7 +196,7 @@ function clientEmailVerification(contact) {
     return true;
 }
 
-// Validation de nom/prénom
+// name validation
 function clientFirstNameVerification(contact) {
     let firstNameErrorMsg = document.getElementById("firstNameErrorMsg")
     if (regexName.test(contact.firstName) === false) {
@@ -151,7 +207,6 @@ function clientFirstNameVerification(contact) {
     }
     return true
 }
-
 function clientLastNameVerification(contact) {
     let lastNameErrorMsg = document.getElementById("lastNameErrorMsg")
     if (regexName.test(contact.lastName) === false) {
@@ -163,7 +218,7 @@ function clientLastNameVerification(contact) {
     return true
 }
 
-// Validation d'adresse
+// Address validation
 function clientAddressVerification(contact) {
     let addressErrorMsg = document.getElementById("addressErrorMsg")
     if (regexAddress.test(contact.address) === false) {
@@ -175,7 +230,7 @@ function clientAddressVerification(contact) {
     return true
 }
 
-// Validation de ville, comme les prénoms pas de chiffres ni de symbole, on utilise le regex name
+// City validation
 function validateClientCity(contact) {
     let cityErrorMsg = document.getElementById("cityErrorMsg");
     if (regexName.test(contact.city) === false) {
@@ -187,16 +242,9 @@ function validateClientCity(contact) {
     return true
 }
 
- // La variable contact sera la fiche contact du client, représentant toutes les clés necessaire et données saisies
- let contact = {
-    firstName: document.getElementById("firstName").value,
-    lastName: document.getElementById("lastName").value,
-    address: document.getElementById("address").value,
-    city: document.getElementById("city").value,
-    email: document.getElementById("email").value,
-};
+// check if all form are valid thanks to regex
+function formIsValid(contact) {
 
-function formIsValid() {
     let formIsValid = true;
 
     if (!validateClientCity(contact)) {
@@ -217,19 +265,24 @@ function formIsValid() {
     return formIsValid;
 }
 
-// Montrer le nombre d'article différents présents dans la commande client
+// display how many articles client chosen
 function displayLengthArticles(productsFromLocalStorageArray) {
-    let LengthArticles = document.getElementById('totalQuantity')
-    LengthArticles.textContent = productsFromLocalStorageArray.length
+    let totalArticle = 0;
+    let LengthArticlesEl = document.getElementById('totalQuantity')
+    productsFromLocalStorageArray.forEach(function (product) {
+        totalArticle += product.quantity;
+
+    });
+    LengthArticlesEl.textContent = totalArticle;
 }
 
-///******* Gestion de quantité, client peut changer quantité de produit sur la page de commande ********///
+// Managing quantity by client, in cart page
 function managingQuantityByClient() {
     let btnClientManageQuantity = document.querySelectorAll(".itemQuantity");
 
     for (let k = 0; k < btnClientManageQuantity.length; k++) {
         let btnClientManageQuantity = document.querySelectorAll(".itemQuantity");
-
+        // event listener, if client is changing input's value :
         btnClientManageQuantity[k].addEventListener("change", (event) => {
             event.preventDefault();
             let quantityEl = event.target;
@@ -239,39 +292,39 @@ function managingQuantityByClient() {
             let productColor = productEl.dataset.color;
             let quantity = parseInt(quantityEl.value);
 
-            // On modifie seulement la quantité de l'élement selectionné
+            // change only the element chosen
             let productsFromLocalStorageArray = getProductsFromLocalStorage();
-            // On repère quel est l'élement selectionné
+            // Search what product was modified
             const productFromLocalStorage = productsFromLocalStorageArray.find((product) => {
                 return product.id === productId && product.color === productColor;
             });
 
-            // On en modifie la quantité
+            // Change quantity
             productFromLocalStorage.quantity = quantity;
             localStorage.setItem("products", JSON.stringify(productsFromLocalStorageArray));
 
+            // Refresh statistics
             displayTotalPrice(productsFromLocalStorageArray);
+            displayLengthArticles(productsFromLocalStorageArray);
         })
     }
 }
 
-///****** Supression de produit, client peut supprimer produit du ls de la page commande ******///
+// Deletion product by client
 function deleteItemFromLocalStorage() {
-    // on se saisit des boutons sur la page
+    // take deletion button
     let btnDeleteItemFromLocalStorage = document.querySelectorAll('.deleteItem')
 
-    // On test si on repère leur présence, c'est le cas
-
-    // maintenant on créé une fonction pour chaque bouton
+    // for each button :
     btnDeleteItemFromLocalStorage.forEach(btn => {
-        // Au clic
+        // Listenening event client
         btn.addEventListener("click", (e) => {
             let articleEl = e.target.closest('article');
             const productId = articleEl.dataset.id;
             const color = articleEl.dataset.color;
 
-            // On utilise la méthode filter pour selectionner des produits
-            // 1. On supprime l'élément dans le local storage
+            // filter method to select individual product
+            // 1. Delete product from local storage
             let productsFromLocalStorageArray = getProductsFromLocalStorage();
             let productsFromLocalStorageArrayUpdated = productsFromLocalStorageArray.filter(product => {
                 if (productId === product.id && color === product.color) {
@@ -282,34 +335,15 @@ function deleteItemFromLocalStorage() {
             });
             localStorage.setItem("products", JSON.stringify(productsFromLocalStorageArrayUpdated));
 
-            // 2. On supprime l'élément du DOM
+            // 2. delete element from the dom
             articleEl.remove();
 
             // 3. Display empty message if the collection is empty
             displayEmptyCollection(productsFromLocalStorageArrayUpdated);
 
-            // 4. Display total price
+            // 4. Refresh statistics
             displayTotalPrice(productsFromLocalStorageArrayUpdated);
+            displayLengthArticles(productsFromLocalStorageArrayUpdated);
         })
     })
 }
-
-async function managingOrder(){
-    let productsFromLocalStorageArray = getProductsFromLocalStorage();
-    let clientContact = {contact,
-                        productsFromLocalStorageArray}
-
-
-    await fetch("http://localhost:3000/api/products/order", {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(clientContact),
-            })
-            console.log(clientContact)
-}
-
-
-managingOrder()
