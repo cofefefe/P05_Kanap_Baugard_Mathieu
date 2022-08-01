@@ -6,7 +6,7 @@ let orderId = link.searchParams.get("orderId");
 let displayOrderId = document.getElementById('orderId')
 
 
-// Display number purchase order
+//Display number purchase order
 function displayOrderIdConfirmation(){
     displayOrderId.textContent = orderId
 }
